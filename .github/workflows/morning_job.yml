@@ -29,8 +29,8 @@ jobs:
       run: |
         gdown ${{ secrets.M_VIDEO_LINK }} -O m_video.mp4
         gdown ${{ secrets.M_AUDIO_LINK }} -O m_audio.mp3
-        gdown ${{ secrets.M_THUMB_VIDEO }} -O m_video_thumb_raw.jpg
-        gdown ${{ secrets.M_THUMB_LIVE }} -O m_live_thumb_raw.jpg
+        #gdown ${{ secrets.M_THUMB_VIDEO }} -O m_video_thumb_raw.jpg
+        #gdown ${{ secrets.M_THUMB_LIVE }} -O m_live_thumb_raw.jpg
 
     - name: Python Script ကို Run ၍ ရက်စွဲတပ်ခြင်းနှင့် ဗီဒီယိုအား Schedule တင်ခြင်း
       env:
@@ -38,10 +38,10 @@ jobs:
         YOUTUBE_TOKEN_DATA: ${{ secrets.YOUTUBE_TOKEN_JSON }}
       run: python automation.py morning
 
-    - name: Live Thumbnail ဗီဒီယိုအတိုအား ရက်စွဲ အမြန်ကြိုထည့်ခြင်း (၃ စက္ကန့်သာ ကြာမည်)
-      run: |
-        ffmpeg -i m_live_thumb_raw.jpg -vf "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='$(date +%d.%m.%Y)':x=(w-tw)/2+200:y=h-th-100:fontcolor=white:fontsize=90:box=1:boxcolor=black@0.6" -y m_live_video_ready.mp4
+    - #name: Live Thumbnail ဗီဒီယိုအတိုအား ရက်စွဲ အမြန်ကြိုထည့်ခြင်း (၃ စက္ကန့်သာ ကြာမည်)
+      #run: |
+        #ffmpeg -i m_live_thumb_raw.jpg -vf "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='$(date +%d.%m.%Y)':x=(w-tw)/2+200:y=h-th-100:fontcolor=white:fontsize=90:box=1:boxcolor=black@0.6" -y m_live_video_ready.mp4
 
-    - name: YouTube ပေါ်သို့ ၅ နာရီ ၅၀ မိနစ်စာ (စက္ကန့် ၂၁၀၀၀) Live စတင်လွှင့်ခြင်း
-      run: |
-        ffmpeg -stream_loop -1 -i m_live_video_ready.mp4 -i m_audio.mp3 -c:v libx264 -pix_fmt yuv420p -preset veryfast -b:v 2500k -c:a aac -b:a 128k -f flv -t 21000 "rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}"
+    - #name: YouTube ပေါ်သို့ ၅ နာရီ ၅၀ မိနစ်စာ (စက္ကန့် ၂၁၀၀၀) Live စတင်လွှင့်ခြင်း
+      #run: |
+        #ffmpeg -stream_loop -1 -i m_live_video_ready.mp4 -i m_audio.mp3 -c:v libx264 -pix_fmt yuv420p -preset veryfast -b:v 2500k -c:a aac -b:a 128k -f flv -t 21000 "rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}"
