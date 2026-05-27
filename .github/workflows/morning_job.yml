@@ -27,10 +27,10 @@ jobs:
 
     - name: Google Drive မှ ဖိုင်များကို Secrets လင့်ခ်များသုံး၍ ဒေါင်းလုဒ်ဆွဲခြင်း
       run: |
-        gdown --id ${{ secrets.M_VIDEO_LINK }} -O m_video.mp4
-        gdown --id ${{ secrets.M_AUDIO_LINK }} -O m_audio.mp3
-        gdown --id ${{ secrets.M_THUMB_VIDEO }} -O m_video_thumb_raw.jpg
-        gdown --id ${{ secrets.M_THUMB_LIVE }} -O m_live_thumb_raw.jpg
+        gdown ${{ secrets.M_VIDEO_LINK }} -O m_video.mp4
+        gdown ${{ secrets.M_AUDIO_LINK }} -O m_audio.mp3
+        gdown ${{ secrets.M_THUMB_VIDEO }} -O m_video_thumb_raw.jpg
+        gdown ${{ secrets.M_THUMB_LIVE }} -O m_live_thumb_raw.jpg
 
     - name: Python Script ကို Run ၍ ရက်စွဲတပ်ခြင်းနှင့် ဗီဒီယိုအား Schedule တင်ခြင်း
       env:
