@@ -1,10 +1,15 @@
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from PIL import Image, ImageDraw, ImageFont
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
+
+# ---------------------------------------------------------
+# မြန်မာစံတော်ချိန် (UTC +6:30) ကို သတ်မှတ်ခြင်း (အချိန်ဇုန် ပြဿနာ ဖြေရှင်းရန်)
+# ---------------------------------------------------------
+MMT = timezone(timedelta(hours=6, minutes=30))
 
 # ==========================================
 # အပိုင်း (၁) - Thumbnail ပေါ်တွင် ရက်စွဲတပ်ခြင်း
@@ -12,12 +17,12 @@ from googleapiclient.http import MediaFileUpload
 def add_date_to_thumbnail(input_path, output_path):
     print("[INFO] ပုံပေါ်တွင် ရက်စွဲ ထည့်သွင်းနေပါသည်...")
     try:
-        today_date = datetime.now().strftime("%d.%m.%Y")
+        # datetime.now() အစား datetime.now(MMT) ကို ပြောင်းသုံးထားပါသည်
+        today_date = datetime.now(MMT).strftime("%d.%m.%Y")
         
         img = Image.open(input_path)
         draw = ImageDraw.Draw(img)
         
-        # ဖောင့်အရွယ်အစား ၉၀
         try:
             font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 90)
         except IOError:
@@ -27,62 +32,55 @@ def add_date_to_thumbnail(input_path, output_path):
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
         
-        # tayar.py မှ အတိုင်း ညာသို့ ၂၀၀၊ အပေါ်သို့ ၅၀ ပြင်ဆင်ထားသည်
         x = ((img.width - text_width) / 2) + 200
         y = img.height - text_height - 50
         
-        # Outline width 3 ဖြင့် အနက်ရောင်အရင်ဆွဲသည်
         outline_color = "black"
         outline_width = 3
         for i in range(-outline_width, outline_width+1):
             for j in range(-outline_width, outline_width+1):
                 draw.text((x+i, y+j), today_date, font=font, fill=outline_color)
                 
-        # အဖြူရောင်စာသားအစစ် ထပ်ရေးသည်
         draw.text((x, y), today_date, font=font, fill="white")
         
         img.convert("RGB").save(output_path)
         print(f"[SUCCESS] ရက်စွဲတပ်ပြီးသောပုံကို {output_path} အမည်ဖြင့် သိမ်းလိုက်ပါပြီ။")
     except Exception as e:
         print(f"[ERROR] ပုံပြင်ရာတွင် အမှားရှိနေပါသည်: {e}")
-      # ==========================================
+
+# ==========================================
 # အပိုင်း (၂) - YouTube သို့ Video နှင့် Thumbnail တင်ခြင်း
 # ==========================================
 def upload_video_to_youtube(video_path, thumb_path, title_name, description_text, schedule_time_str):
     print("[INFO] YouTube သို့ ဗီဒီယိုတင်ရန် ပြင်ဆင်နေပါသည်...")
     try:
-        # GitHub Secrets မှ လျှို့ဝှက်စာသားများကို ဖတ်၍ ဖိုင်အဖြစ် ပြန်ပြောင်းခြင်း
         with open('client_secrets.json', 'w') as f:
             f.write(os.environ.get('YOUTUBE_CLIENT_SECRETS_DATA', ''))
         with open('token.json', 'w') as f:
             f.write(os.environ.get('YOUTUBE_TOKEN_DATA', ''))
             
-        # YouTube API နှင့် ချိတ်ဆက်ခြင်း
         credentials = Credentials.from_authorized_user_file('token.json')
         youtube = build('youtube', 'v3', credentials=credentials)
         
-        # ဗီဒီယို ခေါင်းစဉ်၊ ဖော်ပြချက် နှင့် Schedule အချိန် သတ်မှတ်ခြင်း
         body = {
             'snippet': {
                 'title': title_name,
-                'description': description_text,  # <--- အစ်ကိုပေးထားသော Description အသစ် ဝင်မည့်နေရာ
+                'description': description_text,
                 'categoryId': '22'
             },
             'status': {
-                'privacyStatus': 'private', # Schedule အတွက် Private အရင်ထားရသည်
+                'privacyStatus': 'private', 
                 'publishAt': schedule_time_str
             }
         }
         
         media = MediaFileUpload(video_path, chunksize=-1, resumable=True, mimetype='video/*')
         
-        # ဗီဒီယို စတင် Upload လုပ်ခြင်း
         request = youtube.videos().insert(part='snippet,status', body=body, media_body=media)
         response = request.execute()
         video_id = response['id']
         print(f"[SUCCESS] ဗီဒီယို တင်ပြီးပါပြီ။ (Video ID: {video_id})")
         
-        # Thumbnail ပုံကို Video ပေါ်သို့ ထပ်တင်ခြင်း
         youtube.thumbnails().set(videoId=video_id, media_body=MediaFileUpload(thumb_path)).execute()
         print("[SUCCESS] Thumbnail ပုံ တင်ပြီးပါပြီ။")
         
@@ -95,10 +93,7 @@ def upload_video_to_youtube(video_path, thumb_path, title_name, description_text
 if __name__ == "__main__":
     job_type = sys.argv[1] if len(sys.argv) > 1 else "morning"
     
-    # အစ်ကို ပေးထားသော ပုံသေ ခေါင်းစဉ် (Title)
     base_title = "တရားတော်များ 2026 | (ဘေးရှင်းအန္တရာယ်ကင်းကံပွင့်လာဘ်ပွင့်)| Dhamma Garden"
-
-    # အစ်ကို ပေးထားသော Description အရှည်ကြီး (Multiline String သုံးထားသည်)
     video_description = """#dhammachannel #buddhatayarchannel #တရား
 တရားတော်များ | တရားတော်များ 2026 | tayar taw myanmar | buddha | (အန္တရာယ်ကင်း၍ ဘုန်းကြီးကံပွင့်လာဘ်ပွင့်စေရန်) | Dhamma Talk | Buddhist Chanting
 
@@ -131,27 +126,24 @@ Welcome to our Dhamma Talk and Buddhist Chanting collection, dedicated to the My
 #တရားတော်များ #တရားတော်များ2026 #တရားတော်များ2025 #တရား‌တော်များ2024 #တရား #2026တရားတော်များ #tayartawmyanmar #buddha #tayartawmyanmar2025 #tayartaw #tayardhamma #buddhatayarchannel
 #dhamma #dhammachannel #dhammatalk"""
     
-    # YouTube က နေ့စဉ် ခေါင်းစဉ်လုံးဝတူနေပါက Duplicate Video ဟု သတ်မှတ်တတ်သဖြင့်
-    # အစ်ကို့ Title ရဲ့ အနောက်ဆုံးတွင် ဒီနေ့ရက်စွဲလေးကို အလိုအလျောက် ကပ်ပေးမည့် စနစ်လေး ထည့်ပေးထားပါသည်။
-    today_str = datetime.now().strftime('%d.%m.%Y')
+    # ဤနေရာတွင်လည်း datetime.now(MMT) ကို ပြောင်းသုံးထားပါသည်
+    today_str = datetime.now(MMT).strftime('%d.%m.%Y')
     final_title = f"{base_title} [{today_str}]"
     
     if job_type == "morning":
         print("--- မနက်ပိုင်း လုပ်ငန်းစဉ် ---")
         add_date_to_thumbnail("m_video_thumb_raw.jpg", "m_video_thumb.jpg")
         
-        # Schedule ပြသမည့်အချိန် (မနက် ၅:၃၀)
-        target_time = datetime.now().strftime("%Y-%m-%dT05:30:00+06:30")
+        # Schedule သတ်မှတ်ချိန်ကိုပါ မြန်မာစံတော်ချိန်ဖြင့် အတိအကျ ယူပါသည်
+        target_time = datetime.now(MMT).strftime("%Y-%m-%dT05:30:00+06:30")
         
-        # ဤနေရာတွင် final_title နှင့် video_description ကို ထည့်သွင်းပေးလိုက်ပါသည်
         upload_video_to_youtube("m_video.mp4", "m_video_thumb.jpg", final_title, video_description, target_time)
         
     elif job_type == "evening":
         print("--- ညနေပိုင်း လုပ်ငန်းစဉ် ---")
         add_date_to_thumbnail("e_video_thumb_raw.jpg", "e_video_thumb.jpg")
         
-        # Schedule ပြသမည့်အချိန် (ညနေ ၆:၃၀)
-        target_time = datetime.now().strftime("%Y-%m-%dT18:30:00+06:30")
+        # Schedule သတ်မှတ်ချိန်ကိုပါ မြန်မာစံတော်ချိန်ဖြင့် အတိအကျ ယူပါသည်
+        target_time = datetime.now(MMT).strftime("%Y-%m-%dT18:30:00+06:30")
         
-        # ဤနေရာတွင် final_title နှင့် video_description ကို ထည့်သွင်းပေးလိုက်ပါသည်
         upload_video_to_youtube("e_video.mp4", "e_video_thumb.jpg", final_title, video_description, target_time)
