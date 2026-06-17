@@ -94,7 +94,9 @@ if __name__ == "__main__":
     job_type = sys.argv[1] if len(sys.argv) > 1 else "morning"
     
     base_title = "တရားတော်များ 2026 | (ဘေးရှင်းအန္တရာယ်ကင်းကံပွင့်လာဘ်ပွင့်)| Dhamma Garden"
-    video_description = """#dhammachannel #buddhatayarchannel #တရား
+    video_description = """#‎⁨Dhamma Tayar2⁩ Channel
+#မင်းကွန်းဆရာတော်#ပါမောက္ခချုပ်ဆရာတော် #DhammaTalk #Buddha #BuddhaDhamma #တရားတော် #တရားနာခြင်း #နတ်ကောင်းနတ်မြတ် #အိမ်ချမ်းသာရေး#ပဌာန်း ၂၄ ပစ္စည်း#ဓမ္မစက်ြာ#မဟာသမယသုတ်#အနတ္တာလက္ခဏသုတ်#ပရိတ်ကြီး #Mindfulness #SpiritualGrowth #Buddhism #BuddhaWisdom #DhammaMyanmar #DhammaTalk2025#မနက်ခင်းတရားတော်#မနက်တိုင်းဖွင့်
+#မင်းကွန်းဆရာတော် #တရားတော်များ #ပရိတ်တရားတော် #ပဋ္ဌာန်း #ဓမ္မစကြာ #MingunSayadaw  #MyanmarPrayer #BuddhaDhamma #တရားတော်#dhammachannel #buddhatayarchannel #တရား
 တရားတော်များ | တရားတော်များ 2026 | tayar taw myanmar | buddha | (အန္တရာယ်ကင်း၍ ဘုန်းကြီးကံပွင့်လာဘ်ပွင့်စေရန်) | Dhamma Talk | Buddhist Chanting
 
 ဤ တရားတော်များ ၂၀၂၆ အထူးစုစည်းမှုတွင် လူနတ်ဗြဟ္မာ အပေါင်း စိတ်အေးချမ်းသာစွာ နာကြားနိုင်ရန်အတွက် အစွမ်းထက် တရားတော်များကို စနစ်တကျ ပြန်လည် ဆူညံသံများဖယ်ထုတ်ကာ (Remaster) လုပ်၍ တင်ဆက်ထားပါသည်။ ဤ တရားတော်များ သည် ၂၀၂၆ ခုနှစ်အတွင်း ဘေးကင်းအန္တရာယ်ကင်းပြီး ကံပွင့်လာဘ်ပွင့်စေရန် ရည်ရွယ်ထုတ်လွှင့်ခြင်း ဖြစ်ပါသည်။
